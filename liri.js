@@ -42,7 +42,13 @@ if (command === "concert-this") {
         });
 
 } else if (command === "movie-this") {
-    let queryUrl = "http://www.omdbapi.com/?t=" + search + "&y=&plot=short&apikey=trilogy";
+    let queryUrl;
+
+    if (search) {
+        queryUrl = "http://www.omdbapi.com/?t=" + search + "&y=&plot=short&apikey=trilogy";
+    } else {
+        queryUrl = "http://www.omdbapi.com/?t=Mr.Nobody&y=&plot=short&apikey=trilogy";
+    }
 
     axios
         .get(queryUrl)
