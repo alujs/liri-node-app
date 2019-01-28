@@ -4,6 +4,7 @@ require('dotenv').config();
 // 
 var keys = require('./keys.js');
 var spotifyAPI = require('node-spotify-api');
+var axios = require('axios');
 
 var spotify = new spotifyAPI(keys.spotify);
 
@@ -17,7 +18,7 @@ if (command === "concert-this") {
 } else if (command === "spotify-this-song") {
     spotify
         .search({ type: 'track', query: search, limit: 1 })
-        .then(function (response) {
+        .then((response) => {
             response.tracks.items.forEach(element => {
                 // Artist name
                 let artist = element.album.artists[0].name;
@@ -36,11 +37,27 @@ if (command === "concert-this") {
                 console.log(`Album: ${album}\n`);
             });
         })
-        .catch(function (err) {
+        .catch((err) => {
             console.log(`Error: ${err}`);
         });
 
 } else if (command === "movie-this") {
+    let queryUrl = "http://www.omdbapi.com/?t=" + search + "&y=&plot=short&apikey=trilogy";
+
+    axios
+        .get(queryUrl)
+        .then((response) => {
+            console.log(`Title: ${response.data.Title}`);
+            console.log(`Year: ${response.data.Year}`);
+            console.log(`IMDB Rating: ${response.data.imdbRating}`);
+            console.log(`Rotten Tomatoes: ${response.data.Ratings[1].Value}`);
+            console.log(`Country: ${response.data.Country}`);
+            console.log(`Language: ${response.data.Language}`);
+            console.log(`Plot: ${response.data.Plot}\n`);
+        })
+        .catch((err) => {
+            console.log(`Error: ${err}`);
+        })
 
 } else if (command === "do-what-it-says") {
 
