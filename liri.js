@@ -5,17 +5,48 @@ require('dotenv').config();
 var keys = require('./keys.js');
 var spotifyAPI = require('node-spotify-api');
 var axios = require('axios');
+var moment = require('moment');
 
 var spotify = new spotifyAPI(keys.spotify);
 
 var command = process.argv[2];
 var search = process.argv.slice(3).join(" ");
+var queryUrl;
 
 console.log("\nSearch results:\n");
 
 if (command === "concert-this") {
 
+    queryUrl = `https://rest.bandsintown.com/artists/${search}/events?app_id=codingbootcamp`;
+
+    axios
+        .get(queryUrl)
+        .then((response) => {
+            let element = response.data[0];
+
+            // Name of the venue
+            let venueName = element.venue.name;
+            console.log(`Venue: ${venueName}`);
+
+            // Venue location
+            let venueCity = element.venue.city;
+            let venueRegion = element.venue.region;
+            let venueCountry = element.venue.country;
+            console.log(`Location: ${venueCity}, ${venueRegion} ${venueCountry}`);
+
+            // Date of the event
+            let venueDate = moment(element.datetime).format("MM/DD/YYYY");
+
+            console.log(`Date: ${venueDate}\n`);
+        })
+        .catch((err) => {
+            console.log(`Error: ${err}`);
+        })
+
 } else if (command === "spotify-this-song") {
+    if (search == "") {
+        search = "The Sign Ace of Base";
+    } 
     spotify
         .search({ type: 'track', query: search, limit: 1 })
         .then((response) => {
@@ -42,10 +73,9 @@ if (command === "concert-this") {
         });
 
 } else if (command === "movie-this") {
-    let queryUrl;
 
     if (search) {
-        queryUrl = "http://www.omdbapi.com/?t=" + search + "&y=&plot=short&apikey=trilogy";
+        queryUrl = `http://www.omdbapi.com/?t=${search}&y=&plot=short&apikey=trilogy`;
     } else {
         queryUrl = "http://www.omdbapi.com/?t=Mr.Nobody&y=&plot=short&apikey=trilogy";
     }
