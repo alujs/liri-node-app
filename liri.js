@@ -1,11 +1,12 @@
 // Reads and sets any environmental variables with the dotenv package
 require('dotenv').config();
 
-// 
+// Require necessary Node packages
 var keys = require('./keys.js');
 var spotifyAPI = require('node-spotify-api');
 var axios = require('axios');
 var moment = require('moment');
+var fs = require('fs');
 
 var spotify = new spotifyAPI(keys.spotify);
 
@@ -17,6 +18,41 @@ console.log("\nSearch results:\n");
 
 if (command === "concert-this") {
 
+    // Calls concert search function
+    concertSearch(command, search);
+
+} else if (command === "spotify-this-song") {
+
+    // Calls spotify search function
+    spotifySearch(command, search);
+
+} else if (command === "movie-this") {
+
+    // Calls movie search function
+    movieSearch(command, search);
+
+} else if (command === "do-what-it-says") {
+
+    // Reads random.txt file 
+    fs.readFile("random.txt", "utf8", (error, data) => {
+        if (error) {
+            console.log(`Error: ${error}`);
+        }
+
+        // Splits response at the comma
+        let docTxt = data.split(",");
+
+        command = docTxt[0];
+        search = docTxt[1];
+
+        spotifySearch(command, search);
+    });
+
+} else {
+    console.log("I'm sorry, I don't recognize that command.");
+}
+
+function concertSearch(command, search) {
     queryUrl = `https://rest.bandsintown.com/artists/${search}/events?app_id=codingbootcamp`;
 
     axios
@@ -42,11 +78,12 @@ if (command === "concert-this") {
         .catch((err) => {
             console.log(`Error: ${err}`);
         })
+};
 
-} else if (command === "spotify-this-song") {
+function spotifySearch(command, search) {
     if (search == "") {
         search = "The Sign Ace of Base";
-    } 
+    }
     spotify
         .search({ type: 'track', query: search, limit: 1 })
         .then((response) => {
@@ -71,9 +108,9 @@ if (command === "concert-this") {
         .catch((err) => {
             console.log(`Error: ${err}`);
         });
+};
 
-} else if (command === "movie-this") {
-
+function movieSearch(command, search) {
     if (search) {
         queryUrl = `http://www.omdbapi.com/?t=${search}&y=&plot=short&apikey=trilogy`;
     } else {
@@ -94,9 +131,4 @@ if (command === "concert-this") {
         .catch((err) => {
             console.log(`Error: ${err}`);
         })
-
-} else if (command === "do-what-it-says") {
-
-} else {
-    console.log("I'm sorry, I don't recognize that command.");
-}
+};
