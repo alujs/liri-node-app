@@ -45,7 +45,20 @@ if (command === "concert-this") {
         command = docTxt[0];
         search = docTxt[1];
 
-        spotifySearch(command, search);
+        switch (command.includes("")) {
+
+            case command.includes("concert"):
+                concertSearch(command, search);
+                break;
+            case command.includes("spotify"):
+                spotifySearch(command, search);
+                break;
+            case command.includes("movie"):
+                movieSearch(command, search);
+                break;
+            default:
+                console.log("LIRI cannot perform the command.")
+        }
     });
 
 } else {
