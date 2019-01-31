@@ -2,17 +2,18 @@
 require('dotenv').config();
 
 // Require necessary Node packages
-var keys = require('./keys.js');
-var spotifyAPI = require('node-spotify-api');
-var axios = require('axios');
-var moment = require('moment');
-var fs = require('fs');
+const keys = require('./keys.js');
+const spotifyAPI = require('node-spotify-api');
+const axios = require('axios');
+const moment = require('moment');
+const fs = require('fs');
 
-var spotify = new spotifyAPI(keys.spotify);
+const spotify = new spotifyAPI(keys.spotify);
 
-var command = process.argv[2];
-var search = process.argv.slice(3).join(" ");
-var queryUrl;
+let command = process.argv[2];
+let search = process.argv.slice(3).join(" ");
+let queryUrl;
+let object = {};
 
 console.log("\nSearch results:\n");
 
@@ -87,6 +88,15 @@ function concertSearch(command, search) {
             let venueDate = moment(element.datetime).format("MM/DD/YYYY");
 
             console.log(`Date: ${venueDate}\n`);
+
+            object.Command = command;
+            object.Search = search;
+            object.Venue = venueName;
+            object.Location = `${venueCity}, ${venueRegion} ${venueCountry}`;
+            object.Date = venueDate;
+
+            outputText(object);
+            
         })
         .catch((err) => {
             console.log(`Error: ${err}`);
@@ -116,6 +126,16 @@ function spotifySearch(command, search) {
                 // Album name
                 let album = element.album.name;
                 console.log(`Album: ${album}\n`);
+
+                // Log Text
+                object.Command = command;
+                object.Search = search;
+                object.Artist = artist;
+                object.Song = song;
+                object.SpotifyURL = url;
+                object.Album = album;
+
+                outputText(object);
             });
         })
         .catch((err) => {
@@ -133,15 +153,58 @@ function movieSearch(command, search) {
     axios
         .get(queryUrl)
         .then((response) => {
-            console.log(`Title: ${response.data.Title}`);
-            console.log(`Year: ${response.data.Year}`);
-            console.log(`IMDB Rating: ${response.data.imdbRating}`);
-            console.log(`Rotten Tomatoes: ${response.data.Ratings[1].Value}`);
-            console.log(`Country: ${response.data.Country}`);
-            console.log(`Language: ${response.data.Language}`);
-            console.log(`Plot: ${response.data.Plot}\n`);
+
+            // Movie title
+            let title = response.data.Title;
+            console.log(`Title: ${title}`);
+
+            // Movie year
+            let year = response.data.Year;
+            console.log(`Year: ${year}`);
+
+            // IMDB rating
+            let imdbRating = response.data.imdbRating;
+            console.log(`IMDB Rating: ${imdbRating}`);
+
+            // Rotten Tomatoes rating
+            let rtRating = response.data.Ratings[1].Value;
+            console.log(`Rotten Tomatoes: ${rtRating}`);
+
+            // Country movie was made
+            let country = response.data.Country;
+            console.log(`Country: ${country}`);
+
+            // Movie language
+            let language = response.data.Language;
+            console.log(`Language: ${language}`);
+
+            // Moive plot
+            let plot = response.data.Plot;
+            console.log(`Plot: ${plot}\n`);
+
+            // Log Text
+            object.Command = command;
+            object.Search = search;
+            object.Title = title;
+            object.Year = year;
+            object.imdbRating = imdbRating;
+            object.rtRating = rtRating;
+            object.Country = country;
+            object.Language = language;
+            object.Plot = plot;
+
+            outputText(object);
         })
         .catch((err) => {
             console.log(`Error: ${err}`);
         })
 };
+
+function outputText (object) {
+    fs.appendFile('log.txt', `${JSON.stringify(object)}\n`, (err) => {
+        if (err) {
+            console.log(`Error: ${err}`);
+        }
+        console.log("Data was appended to the file")
+    })
+}
